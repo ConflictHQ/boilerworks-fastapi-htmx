@@ -1,4 +1,6 @@
 import json
+import uuid
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -24,7 +26,17 @@ async def list_workflows(
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("workflows.view")),
 ):
-    workflows = (await db.execute(select(WorkflowDefinition).order_by(WorkflowDefinition.id.desc()))).scalars().all()
+    workflows = (
+        (
+            await db.execute(
+                select(WorkflowDefinition)
+                .where(WorkflowDefinition.deleted_at.is_(None))
+                .order_by(WorkflowDefinition.created_at.desc())
+            )
+        )
+        .scalars()
+        .all()
+    )
     return _templates(request).TemplateResponse(
         request, "pages/workflows/index.html", context={"user": user, "workflows": workflows}
     )
@@ -68,11 +80,17 @@ async def create_workflow(
 @router.get("/{workflow_id}", response_class=HTMLResponse)
 async def show_workflow(
     request: Request,
-    workflow_id: int,
+    workflow_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("workflows.view")),
 ):
-    wf = (await db.execute(select(WorkflowDefinition).where(WorkflowDefinition.id == workflow_id))).scalar_one_or_none()
+    wf = (
+        await db.execute(
+            select(WorkflowDefinition).where(
+                WorkflowDefinition.id == workflow_id, WorkflowDefinition.deleted_at.is_(None)
+            )
+        )
+    ).scalar_one_or_none()
     if not wf:
         return HTMLResponse("Not found", status_code=404)
     return _templates(request).TemplateResponse(
@@ -83,11 +101,17 @@ async def show_workflow(
 @router.get("/{workflow_id}/edit", response_class=HTMLResponse)
 async def edit_workflow_page(
     request: Request,
-    workflow_id: int,
+    workflow_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("workflows.edit")),
 ):
-    wf = (await db.execute(select(WorkflowDefinition).where(WorkflowDefinition.id == workflow_id))).scalar_one_or_none()
+    wf = (
+        await db.execute(
+            select(WorkflowDefinition).where(
+                WorkflowDefinition.id == workflow_id, WorkflowDefinition.deleted_at.is_(None)
+            )
+        )
+    ).scalar_one_or_none()
     if not wf:
         return HTMLResponse("Not found", status_code=404)
     return _templates(request).TemplateResponse(
@@ -98,11 +122,17 @@ async def edit_workflow_page(
 @router.post("/{workflow_id}", response_class=HTMLResponse)
 async def update_workflow(
     request: Request,
-    workflow_id: int,
+    workflow_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("workflows.edit")),
 ):
-    wf = (await db.execute(select(WorkflowDefinition).where(WorkflowDefinition.id == workflow_id))).scalar_one_or_none()
+    wf = (
+        await db.execute(
+            select(WorkflowDefinition).where(
+                WorkflowDefinition.id == workflow_id, WorkflowDefinition.deleted_at.is_(None)
+            )
+        )
+    ).scalar_one_or_none()
     if not wf:
         return HTMLResponse("Not found", status_code=404)
 
@@ -124,11 +154,17 @@ async def update_workflow(
 @router.get("/{workflow_id}/instances", response_class=HTMLResponse)
 async def list_instances(
     request: Request,
-    workflow_id: int,
+    workflow_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("workflows.view")),
 ):
-    wf = (await db.execute(select(WorkflowDefinition).where(WorkflowDefinition.id == workflow_id))).scalar_one_or_none()
+    wf = (
+        await db.execute(
+            select(WorkflowDefinition).where(
+                WorkflowDefinition.id == workflow_id, WorkflowDefinition.deleted_at.is_(None)
+            )
+        )
+    ).scalar_one_or_none()
     if not wf:
         return HTMLResponse("Not found", status_code=404)
 
@@ -136,8 +172,11 @@ async def list_instances(
         (
             await db.execute(
                 select(WorkflowInstance)
-                .where(WorkflowInstance.workflow_definition_id == workflow_id)
-                .order_by(WorkflowInstance.id.desc())
+                .where(
+                    WorkflowInstance.workflow_definition_id == workflow_id,
+                    WorkflowInstance.deleted_at.is_(None),
+                )
+                .order_by(WorkflowInstance.created_at.desc())
             )
         )
         .scalars()
@@ -154,11 +193,17 @@ async def list_instances(
 @router.post("/{workflow_id}/instances", response_class=HTMLResponse)
 async def create_instance(
     request: Request,
-    workflow_id: int,
+    workflow_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("workflows.create")),
 ):
-    wf = (await db.execute(select(WorkflowDefinition).where(WorkflowDefinition.id == workflow_id))).scalar_one_or_none()
+    wf = (
+        await db.execute(
+            select(WorkflowDefinition).where(
+                WorkflowDefinition.id == workflow_id, WorkflowDefinition.deleted_at.is_(None)
+            )
+        )
+    ).scalar_one_or_none()
     if not wf:
         return HTMLResponse("Not found", status_code=404)
 
@@ -179,14 +224,22 @@ async def create_instance(
 @router.post("/{workflow_id}/instances/{instance_id}/transition", response_class=HTMLResponse)
 async def do_transition(
     request: Request,
-    workflow_id: int,
-    instance_id: int,
+    workflow_id: uuid.UUID,
+    instance_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("workflows.edit")),
 ):
-    wf = (await db.execute(select(WorkflowDefinition).where(WorkflowDefinition.id == workflow_id))).scalar_one_or_none()
+    wf = (
+        await db.execute(
+            select(WorkflowDefinition).where(
+                WorkflowDefinition.id == workflow_id, WorkflowDefinition.deleted_at.is_(None)
+            )
+        )
+    ).scalar_one_or_none()
     instance = (
-        await db.execute(select(WorkflowInstance).where(WorkflowInstance.id == instance_id))
+        await db.execute(
+            select(WorkflowInstance).where(WorkflowInstance.id == instance_id, WorkflowInstance.deleted_at.is_(None))
+        )
     ).scalar_one_or_none()
     if not wf or not instance:
         return HTMLResponse("Not found", status_code=404)
@@ -205,14 +258,20 @@ async def do_transition(
 @router.delete("/{workflow_id}", response_class=HTMLResponse)
 async def delete_workflow(
     request: Request,
-    workflow_id: int,
+    workflow_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("workflows.delete")),
 ):
-    wf = (await db.execute(select(WorkflowDefinition).where(WorkflowDefinition.id == workflow_id))).scalar_one_or_none()
+    wf = (
+        await db.execute(
+            select(WorkflowDefinition).where(
+                WorkflowDefinition.id == workflow_id, WorkflowDefinition.deleted_at.is_(None)
+            )
+        )
+    ).scalar_one_or_none()
     if not wf:
         return HTMLResponse("Not found", status_code=404)
-    await db.delete(wf)
+    wf.deleted_at = datetime.now(UTC)
     await db.commit()
     if request.headers.get("HX-Request"):
         return HTMLResponse("", status_code=200)

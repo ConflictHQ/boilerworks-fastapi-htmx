@@ -1,3 +1,6 @@
+import uuid
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
@@ -22,7 +25,12 @@ async def list_products(
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("products.view")),
 ):
-    result = await db.execute(select(Product).options(selectinload(Product.category)).order_by(Product.id.desc()))
+    result = await db.execute(
+        select(Product)
+        .where(Product.deleted_at.is_(None))
+        .options(selectinload(Product.category))
+        .order_by(Product.created_at.desc())
+    )
     products = result.scalars().all()
 
     ctx = {"user": user, "products": products}
@@ -37,7 +45,11 @@ async def create_product_page(
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("products.create")),
 ):
-    categories = (await db.execute(select(Category).order_by(Category.name))).scalars().all()
+    categories = (
+        (await db.execute(select(Category).where(Category.deleted_at.is_(None)).order_by(Category.name)))
+        .scalars()
+        .all()
+    )
     return _templates(request).TemplateResponse(
         request, "pages/products/create.html", context={"user": user, "categories": categories}
     )
@@ -56,7 +68,7 @@ async def create_product(
         description=form.get("description", ""),
         price=float(form.get("price", 0)),
         sku=form.get("sku", ""),
-        category_id=int(category_id) if category_id else None,
+        category_id=uuid.UUID(category_id) if category_id else None,
     )
     db.add(product)
     await db.commit()
@@ -66,11 +78,15 @@ async def create_product(
 @router.get("/{product_id}", response_class=HTMLResponse)
 async def show_product(
     request: Request,
-    product_id: int,
+    product_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("products.view")),
 ):
-    result = await db.execute(select(Product).where(Product.id == product_id).options(selectinload(Product.category)))
+    result = await db.execute(
+        select(Product)
+        .where(Product.id == product_id, Product.deleted_at.is_(None))
+        .options(selectinload(Product.category))
+    )
     product = result.scalar_one_or_none()
     if not product:
         return HTMLResponse("Not found", status_code=404)
@@ -82,14 +98,20 @@ async def show_product(
 @router.get("/{product_id}/edit", response_class=HTMLResponse)
 async def edit_product_page(
     request: Request,
-    product_id: int,
+    product_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("products.edit")),
 ):
-    product = (await db.execute(select(Product).where(Product.id == product_id))).scalar_one_or_none()
+    product = (
+        await db.execute(select(Product).where(Product.id == product_id, Product.deleted_at.is_(None)))
+    ).scalar_one_or_none()
     if not product:
         return HTMLResponse("Not found", status_code=404)
-    categories = (await db.execute(select(Category).order_by(Category.name))).scalars().all()
+    categories = (
+        (await db.execute(select(Category).where(Category.deleted_at.is_(None)).order_by(Category.name)))
+        .scalars()
+        .all()
+    )
     return _templates(request).TemplateResponse(
         request,
         "pages/products/edit.html",
@@ -100,11 +122,13 @@ async def edit_product_page(
 @router.post("/{product_id}", response_class=HTMLResponse)
 async def update_product(
     request: Request,
-    product_id: int,
+    product_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("products.edit")),
 ):
-    product = (await db.execute(select(Product).where(Product.id == product_id))).scalar_one_or_none()
+    product = (
+        await db.execute(select(Product).where(Product.id == product_id, Product.deleted_at.is_(None)))
+    ).scalar_one_or_none()
     if not product:
         return HTMLResponse("Not found", status_code=404)
 
@@ -114,7 +138,7 @@ async def update_product(
     product.price = float(form.get("price", product.price))
     product.sku = form.get("sku", product.sku)
     category_id = form.get("category_id")
-    product.category_id = int(category_id) if category_id else None
+    product.category_id = uuid.UUID(category_id) if category_id else None
     await db.commit()
     return RedirectResponse("/products", status_code=302)
 
@@ -122,14 +146,16 @@ async def update_product(
 @router.delete("/{product_id}", response_class=HTMLResponse)
 async def delete_product(
     request: Request,
-    product_id: int,
+    product_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("products.delete")),
 ):
-    product = (await db.execute(select(Product).where(Product.id == product_id))).scalar_one_or_none()
+    product = (
+        await db.execute(select(Product).where(Product.id == product_id, Product.deleted_at.is_(None)))
+    ).scalar_one_or_none()
     if not product:
         return HTMLResponse("Not found", status_code=404)
-    await db.delete(product)
+    product.deleted_at = datetime.now(UTC)
     await db.commit()
     if request.headers.get("HX-Request"):
         return HTMLResponse("", status_code=200, headers={"HX-Trigger": "productDeleted"})

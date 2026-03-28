@@ -1,5 +1,8 @@
+import uuid
+
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.workflow import WorkflowDefinition, WorkflowInstance
@@ -30,11 +33,10 @@ async def test_create_workflow(client: AsyncClient, admin_session_token: str, db
     )
     assert resp.status_code == 302
 
-    from sqlalchemy import select
-
     result = await db.execute(select(WorkflowDefinition).where(WorkflowDefinition.name == "Approval"))
     wf = result.scalar_one_or_none()
     assert wf is not None
+    assert isinstance(wf.id, uuid.UUID)
     assert len(wf.states) == 3
 
 

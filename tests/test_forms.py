@@ -1,5 +1,8 @@
+import uuid
+
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.form import FormDefinition
@@ -24,11 +27,10 @@ async def test_create_form(client: AsyncClient, admin_session_token: str, db: As
     )
     assert resp.status_code == 302
 
-    from sqlalchemy import select
-
     result = await db.execute(select(FormDefinition).where(FormDefinition.name == "Contact Form"))
     form_def = result.scalar_one_or_none()
     assert form_def is not None
+    assert isinstance(form_def.id, uuid.UUID)
     assert form_def.schema["fields"][0]["type"] == "email"
 
 

@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.workflow import TransitionLog, WorkflowDefinition, WorkflowInstance
@@ -20,7 +22,7 @@ async def transition_instance(
     instance: WorkflowInstance,
     definition: WorkflowDefinition,
     to_state: str,
-    triggered_by: int | None = None,
+    triggered_by: uuid.UUID | None = None,
     note: str = "",
 ) -> WorkflowInstance:
     """Execute a state transition on a workflow instance."""

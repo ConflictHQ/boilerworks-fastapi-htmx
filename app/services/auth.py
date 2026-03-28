@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import secrets
+import uuid
 
 import bcrypt
 from sqlalchemy import select
@@ -23,7 +24,7 @@ def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
-async def create_session(db: AsyncSession, user_id: int) -> str:
+async def create_session(db: AsyncSession, user_id: uuid.UUID) -> str:
     token = secrets.token_urlsafe(32)
     session = Session(
         user_id=user_id,

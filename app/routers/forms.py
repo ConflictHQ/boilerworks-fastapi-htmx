@@ -1,4 +1,6 @@
 import json
+import uuid
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -24,7 +26,17 @@ async def list_forms(
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("forms.view")),
 ):
-    forms = (await db.execute(select(FormDefinition).order_by(FormDefinition.id.desc()))).scalars().all()
+    forms = (
+        (
+            await db.execute(
+                select(FormDefinition)
+                .where(FormDefinition.deleted_at.is_(None))
+                .order_by(FormDefinition.created_at.desc())
+            )
+        )
+        .scalars()
+        .all()
+    )
     return _templates(request).TemplateResponse(
         request, "pages/forms/index.html", context={"user": user, "forms": forms}
     )
@@ -64,11 +76,15 @@ async def create_form(
 @router.get("/{form_id}", response_class=HTMLResponse)
 async def show_form(
     request: Request,
-    form_id: int,
+    form_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("forms.view")),
 ):
-    form_def = (await db.execute(select(FormDefinition).where(FormDefinition.id == form_id))).scalar_one_or_none()
+    form_def = (
+        await db.execute(
+            select(FormDefinition).where(FormDefinition.id == form_id, FormDefinition.deleted_at.is_(None))
+        )
+    ).scalar_one_or_none()
     if not form_def:
         return HTMLResponse("Not found", status_code=404)
 
@@ -76,8 +92,8 @@ async def show_form(
         (
             await db.execute(
                 select(FormSubmission)
-                .where(FormSubmission.form_definition_id == form_id)
-                .order_by(FormSubmission.id.desc())
+                .where(FormSubmission.form_definition_id == form_id, FormSubmission.deleted_at.is_(None))
+                .order_by(FormSubmission.created_at.desc())
             )
         )
         .scalars()
@@ -94,11 +110,15 @@ async def show_form(
 @router.get("/{form_id}/edit", response_class=HTMLResponse)
 async def edit_form_page(
     request: Request,
-    form_id: int,
+    form_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("forms.edit")),
 ):
-    form_def = (await db.execute(select(FormDefinition).where(FormDefinition.id == form_id))).scalar_one_or_none()
+    form_def = (
+        await db.execute(
+            select(FormDefinition).where(FormDefinition.id == form_id, FormDefinition.deleted_at.is_(None))
+        )
+    ).scalar_one_or_none()
     if not form_def:
         return HTMLResponse("Not found", status_code=404)
     return _templates(request).TemplateResponse(
@@ -109,11 +129,15 @@ async def edit_form_page(
 @router.post("/{form_id}", response_class=HTMLResponse)
 async def update_form(
     request: Request,
-    form_id: int,
+    form_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("forms.edit")),
 ):
-    form_def = (await db.execute(select(FormDefinition).where(FormDefinition.id == form_id))).scalar_one_or_none()
+    form_def = (
+        await db.execute(
+            select(FormDefinition).where(FormDefinition.id == form_id, FormDefinition.deleted_at.is_(None))
+        )
+    ).scalar_one_or_none()
     if not form_def:
         return HTMLResponse("Not found", status_code=404)
 
@@ -133,11 +157,15 @@ async def update_form(
 @router.get("/{form_id}/submit", response_class=HTMLResponse)
 async def submit_form_page(
     request: Request,
-    form_id: int,
+    form_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("forms.submit")),
 ):
-    form_def = (await db.execute(select(FormDefinition).where(FormDefinition.id == form_id))).scalar_one_or_none()
+    form_def = (
+        await db.execute(
+            select(FormDefinition).where(FormDefinition.id == form_id, FormDefinition.deleted_at.is_(None))
+        )
+    ).scalar_one_or_none()
     if not form_def:
         return HTMLResponse("Not found", status_code=404)
     return _templates(request).TemplateResponse(
@@ -148,11 +176,15 @@ async def submit_form_page(
 @router.post("/{form_id}/submit", response_class=HTMLResponse)
 async def submit_form(
     request: Request,
-    form_id: int,
+    form_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("forms.submit")),
 ):
-    form_def = (await db.execute(select(FormDefinition).where(FormDefinition.id == form_id))).scalar_one_or_none()
+    form_def = (
+        await db.execute(
+            select(FormDefinition).where(FormDefinition.id == form_id, FormDefinition.deleted_at.is_(None))
+        )
+    ).scalar_one_or_none()
     if not form_def:
         return HTMLResponse("Not found", status_code=404)
 
@@ -181,14 +213,18 @@ async def submit_form(
 @router.delete("/{form_id}", response_class=HTMLResponse)
 async def delete_form(
     request: Request,
-    form_id: int,
+    form_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("forms.delete")),
 ):
-    form_def = (await db.execute(select(FormDefinition).where(FormDefinition.id == form_id))).scalar_one_or_none()
+    form_def = (
+        await db.execute(
+            select(FormDefinition).where(FormDefinition.id == form_id, FormDefinition.deleted_at.is_(None))
+        )
+    ).scalar_one_or_none()
     if not form_def:
         return HTMLResponse("Not found", status_code=404)
-    await db.delete(form_def)
+    form_def.deleted_at = datetime.now(UTC)
     await db.commit()
     if request.headers.get("HX-Request"):
         return HTMLResponse("", status_code=200)

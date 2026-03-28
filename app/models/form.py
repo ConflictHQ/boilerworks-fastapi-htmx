@@ -1,13 +1,15 @@
+import uuid
+
 from sqlalchemy import JSON, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, TimestampMixin
+from app.models.base import Base, SoftDeleteMixin, TimestampMixin, UUIDType
 
 
-class FormDefinition(TimestampMixin, Base):
+class FormDefinition(SoftDeleteMixin, TimestampMixin, Base):
     __tablename__ = "form_definitions"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(UUIDType(), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     schema: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
@@ -15,14 +17,16 @@ class FormDefinition(TimestampMixin, Base):
     submissions: Mapped[list["FormSubmission"]] = relationship(back_populates="form_definition")
 
 
-class FormSubmission(TimestampMixin, Base):
+class FormSubmission(SoftDeleteMixin, TimestampMixin, Base):
     __tablename__ = "form_submissions"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    form_definition_id: Mapped[int] = mapped_column(
-        ForeignKey("form_definitions.id", ondelete="CASCADE"), nullable=False
+    id: Mapped[uuid.UUID] = mapped_column(UUIDType(), primary_key=True, default=uuid.uuid4)
+    form_definition_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("form_definitions.id", ondelete="CASCADE"), nullable=False
     )
-    submitted_by: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    submitted_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUIDType(), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     data: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     form_definition: Mapped["FormDefinition"] = relationship(back_populates="submissions")

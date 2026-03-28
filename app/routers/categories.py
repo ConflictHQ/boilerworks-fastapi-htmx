@@ -1,3 +1,6 @@
+import uuid
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
@@ -21,7 +24,11 @@ async def list_categories(
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("categories.view")),
 ):
-    categories = (await db.execute(select(Category).order_by(Category.id.desc()))).scalars().all()
+    categories = (
+        (await db.execute(select(Category).where(Category.deleted_at.is_(None)).order_by(Category.created_at.desc())))
+        .scalars()
+        .all()
+    )
     return _templates(request).TemplateResponse(
         request, "pages/categories/index.html", context={"user": user, "categories": categories}
     )
@@ -51,11 +58,13 @@ async def create_category(
 @router.get("/{category_id}", response_class=HTMLResponse)
 async def show_category(
     request: Request,
-    category_id: int,
+    category_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("categories.view")),
 ):
-    category = (await db.execute(select(Category).where(Category.id == category_id))).scalar_one_or_none()
+    category = (
+        await db.execute(select(Category).where(Category.id == category_id, Category.deleted_at.is_(None)))
+    ).scalar_one_or_none()
     if not category:
         return HTMLResponse("Not found", status_code=404)
     return _templates(request).TemplateResponse(
@@ -66,11 +75,13 @@ async def show_category(
 @router.get("/{category_id}/edit", response_class=HTMLResponse)
 async def edit_category_page(
     request: Request,
-    category_id: int,
+    category_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("categories.edit")),
 ):
-    category = (await db.execute(select(Category).where(Category.id == category_id))).scalar_one_or_none()
+    category = (
+        await db.execute(select(Category).where(Category.id == category_id, Category.deleted_at.is_(None)))
+    ).scalar_one_or_none()
     if not category:
         return HTMLResponse("Not found", status_code=404)
     return _templates(request).TemplateResponse(
@@ -81,11 +92,13 @@ async def edit_category_page(
 @router.post("/{category_id}", response_class=HTMLResponse)
 async def update_category(
     request: Request,
-    category_id: int,
+    category_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("categories.edit")),
 ):
-    category = (await db.execute(select(Category).where(Category.id == category_id))).scalar_one_or_none()
+    category = (
+        await db.execute(select(Category).where(Category.id == category_id, Category.deleted_at.is_(None)))
+    ).scalar_one_or_none()
     if not category:
         return HTMLResponse("Not found", status_code=404)
     form = await request.form()
@@ -98,14 +111,16 @@ async def update_category(
 @router.delete("/{category_id}", response_class=HTMLResponse)
 async def delete_category(
     request: Request,
-    category_id: int,
+    category_id: uuid.UUID,
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("categories.delete")),
 ):
-    category = (await db.execute(select(Category).where(Category.id == category_id))).scalar_one_or_none()
+    category = (
+        await db.execute(select(Category).where(Category.id == category_id, Category.deleted_at.is_(None)))
+    ).scalar_one_or_none()
     if not category:
         return HTMLResponse("Not found", status_code=404)
-    await db.delete(category)
+    category.deleted_at = datetime.now(UTC)
     await db.commit()
     if request.headers.get("HX-Request"):
         return HTMLResponse("", status_code=200)
