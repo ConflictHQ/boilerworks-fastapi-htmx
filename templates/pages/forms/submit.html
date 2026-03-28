@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block title %}Submit {{ form_def.name }} - Boilerworks{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Submit: {{ form_def.name }}</h1>
+<div class="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl">
+    {% if errors is defined and errors %}
+    <div class="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-200 text-sm">
+        <ul class="list-disc list-inside">
+            {% for err in errors %}<li>{{ err }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    <form method="post" action="/forms/{{ form_def.id }}/submit">
+        <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token | default('') }}">
+        {% for field in form_def.schema.get('fields', []) %}
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">{{ field.label | default(field.name) }}{% if field.required %} *{% endif %}</label>
+            {% if field.type == 'textarea' %}
+            <textarea name="{{ field.name }}" rows="3" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">{{ (data or {}). get(field.name, '') }}</textarea>
+            {% elif field.type == 'select' %}
+            <select name="{{ field.name }}" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
+                <option value="">Select...</option>
+                {% for opt in field.get('options', []) %}
+                <option value="{{ opt }}" {% if (data or {}).get(field.name) == opt|string %}selected{% endif %}>{{ opt }}</option>
+                {% endfor %}
+            </select>
+            {% else %}
+            <input type="{{ field.type | default('text') }}" name="{{ field.name }}" value="{{ (data or {}).get(field.name, '') }}" {% if field.required %}required{% endif %} class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div class="flex space-x-3">
+            <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-medium transition-colors">Submit</button>
+            <a href="/forms/{{ form_def.id }}" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

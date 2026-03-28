@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Boilerworks{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+<body class="h-full bg-gray-950 text-gray-100">
+    <div class="flex h-full">
+        {% if user %}
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
+            <div class="p-4 border-b border-gray-800">
+                <a href="/dashboard" class="flex items-center space-x-2">
+                    <img src="/static/images/logo-dark.svg" alt="Boilerworks" class="h-8 w-auto">
+                </a>
+            </div>
+            <nav class="flex-1 p-4 space-y-1">
+                <a href="/dashboard" class="block px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">Dashboard</a>
+                <a href="/products" class="block px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">Products</a>
+                <a href="/categories" class="block px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">Categories</a>
+                <a href="/forms" class="block px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">Forms</a>
+                <a href="/workflows" class="block px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">Workflows</a>
+            </nav>
+            <div class="p-4 border-t border-gray-800">
+                <div class="text-sm text-gray-400 mb-2">{{ user.display_name }}</div>
+                <form method="post" action="/logout">
+                    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token | default('') }}">
+                    <button type="submit" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">Sign out</button>
+                </form>
+            </div>
+        </aside>
+        {% endif %}
+
+        <!-- Main content -->
+        <main class="flex-1 overflow-y-auto">
+            <div class="p-6 max-w-6xl mx-auto">
+                {% include "components/flash.html" ignore missing %}
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

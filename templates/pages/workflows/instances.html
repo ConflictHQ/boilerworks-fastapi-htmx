@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block title %}{{ workflow.name }} Instances - Boilerworks{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">{{ workflow.name }} - Instances</h1>
+    <div class="space-x-2">
+        <form method="post" action="/workflows/{{ workflow.id }}/instances" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token | default('') }}">
+            <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-medium transition-colors">New Instance</button>
+        </form>
+        <a href="/workflows/{{ workflow.id }}" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors">Back</a>
+    </div>
+</div>
+<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-800/50">
+            <tr>
+                <th class="text-left px-4 py-3 text-sm text-gray-400 font-medium">ID</th>
+                <th class="text-left px-4 py-3 text-sm text-gray-400 font-medium">State</th>
+                <th class="text-right px-4 py-3 text-sm text-gray-400 font-medium">Transition</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800">
+            {% for inst in instances %}
+            <tr class="hover:bg-gray-800/30">
+                <td class="px-4 py-3 text-gray-300">#{{ inst.id }}</td>
+                <td class="px-4 py-3">
+                    <span class="px-2 py-1 bg-indigo-900/50 text-indigo-300 rounded text-sm">{{ inst.current_state }}</span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                    {% set transitions = [] %}
+                    {% if workflow.transitions is iterable %}
+                        {% for t in workflow.transitions %}
+                            {% if t.get('from') == inst.current_state %}
+                                {% set _ = transitions.append(t) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if transitions %}
+                    <form method="post" action="/workflows/{{ workflow.id }}/instances/{{ inst.id }}/transition" class="inline-flex space-x-2">
+                        <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token | default('') }}">
+                        <select name="to_state" class="px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm text-gray-300">
+                            {% for t in transitions %}
+                            <option value="{{ t.to }}">{{ t.to }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm transition-colors">Go</button>
+                    </form>
+                    {% else %}
+                    <span class="text-sm text-gray-500">Terminal</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="px-4 py-8 text-center text-gray-500">No instances yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

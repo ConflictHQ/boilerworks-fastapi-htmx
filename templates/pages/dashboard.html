@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard - Boilerworks{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <div class="text-sm text-gray-400 mb-1">Products</div>
+        <div class="text-3xl font-bold text-indigo-400">{{ stats.products }}</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <div class="text-sm text-gray-400 mb-1">Categories</div>
+        <div class="text-3xl font-bold text-indigo-400">{{ stats.categories }}</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <div class="text-sm text-gray-400 mb-1">Forms</div>
+        <div class="text-3xl font-bold text-indigo-400">{{ stats.forms }}</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <div class="text-sm text-gray-400 mb-1">Submissions</div>
+        <div class="text-3xl font-bold text-indigo-400">{{ stats.submissions }}</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <div class="text-sm text-gray-400 mb-1">Workflow Instances</div>
+        <div class="text-3xl font-bold text-indigo-400">{{ stats.workflows }}</div>
+    </div>
+</div>
+{% endblock %}

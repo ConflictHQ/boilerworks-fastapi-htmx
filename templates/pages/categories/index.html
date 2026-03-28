@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}Categories - Boilerworks{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Categories</h1>
+    <a href="/categories/create" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-medium transition-colors">New Category</a>
+</div>
+<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-800/50">
+            <tr>
+                <th class="text-left px-4 py-3 text-sm text-gray-400 font-medium">Name</th>
+                <th class="text-left px-4 py-3 text-sm text-gray-400 font-medium">Description</th>
+                <th class="text-right px-4 py-3 text-sm text-gray-400 font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800">
+            {% for category in categories %}
+            <tr id="category-{{ category.id }}" class="hover:bg-gray-800/30">
+                <td class="px-4 py-3"><a href="/categories/{{ category.id }}" class="text-indigo-400 hover:text-indigo-300">{{ category.name }}</a></td>
+                <td class="px-4 py-3 text-gray-400 text-sm">{{ category.description[:80] }}{{ '...' if category.description|length > 80 else '' }}</td>
+                <td class="px-4 py-3 text-right space-x-2">
+                    <a href="/categories/{{ category.id }}/edit" class="text-sm text-gray-400 hover:text-gray-200">Edit</a>
+                    <button hx-delete="/categories/{{ category.id }}" hx-target="#category-{{ category.id }}" hx-swap="outerHTML" hx-confirm="Delete this category?" class="text-sm text-red-400 hover:text-red-300">Delete</button>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="px-4 py-8 text-center text-gray-500">No categories yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

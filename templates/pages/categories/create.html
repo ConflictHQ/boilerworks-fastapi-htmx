@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block title %}New Category - Boilerworks{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">New Category</h1>
+<div class="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl">
+    <form method="post" action="/categories">
+        <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token | default('') }}">
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">Name</label>
+            <input type="text" name="name" required class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500">
+        </div>
+        <div class="mb-6">
+            <label class="block text-sm text-gray-400 mb-1">Description</label>
+            <textarea name="description" rows="3" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+        <div class="flex space-x-3">
+            <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-medium transition-colors">Create</button>
+            <a href="/categories" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

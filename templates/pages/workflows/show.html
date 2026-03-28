@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}{{ workflow.name }} - Boilerworks{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">{{ workflow.name }}</h1>
+    <div class="space-x-2">
+        <a href="/workflows/{{ workflow.id }}/instances" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-medium transition-colors">Instances</a>
+        <a href="/workflows/{{ workflow.id }}/edit" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors">Edit</a>
+        <a href="/workflows" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors">Back</a>
+    </div>
+</div>
+<div class="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl">
+    <p class="text-gray-400 mb-4">{{ workflow.description or 'No description.' }}</p>
+    <h3 class="text-sm font-medium text-gray-400 mb-2">States</h3>
+    <pre class="bg-gray-800 rounded-lg p-4 text-sm text-gray-300 mb-4">{{ workflow.states | tojson(indent=2) }}</pre>
+    <h3 class="text-sm font-medium text-gray-400 mb-2">Transitions</h3>
+    <pre class="bg-gray-800 rounded-lg p-4 text-sm text-gray-300">{{ workflow.transitions | tojson(indent=2) }}</pre>
+</div>
+{% endblock %}
