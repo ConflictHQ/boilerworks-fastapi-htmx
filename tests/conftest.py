@@ -81,10 +81,10 @@ async def client(db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 async def _seed_permissions(db: AsyncSession) -> dict[str, Permission]:
     """Create all permissions and return a map."""
     codes = [
-        "products.view",
-        "products.create",
-        "products.edit",
-        "products.delete",
+        "items.view",
+        "items.create",
+        "items.edit",
+        "items.delete",
         "categories.view",
         "categories.create",
         "categories.edit",

@@ -54,7 +54,7 @@ docker compose up -d --build
 
 - **Session Auth** -- Login, register, logout with httpOnly cookie sessions
 - **Group Permissions** -- Admin/editor/viewer groups with granular permission checks
-- **Products CRUD** -- Full create/read/update/delete with category associations
+- **Items CRUD** -- Full create/read/update/delete with category associations
 - **Categories CRUD** -- Standalone category management
 - **Forms Engine** -- JSON schema-driven dynamic forms with validation and submission tracking
 - **Workflow Engine** -- State machine with JSON-defined states/transitions, instance tracking, and audit logs

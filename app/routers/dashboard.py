@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_async_session
 from app.models.form import FormDefinition, FormSubmission
-from app.models.product import Category, Product
+from app.models.item import Category, Item
 from app.models.workflow import WorkflowInstance
 
 router = APIRouter(tags=["dashboard"])
@@ -24,14 +24,14 @@ async def dashboard(request: Request, db: AsyncSession = Depends(get_async_sessi
     if not user:
         return RedirectResponse("/login", status_code=302)
 
-    products_count = (await db.execute(select(func.count(Product.id)))).scalar() or 0
+    items_count = (await db.execute(select(func.count(Item.id)))).scalar() or 0
     categories_count = (await db.execute(select(func.count(Category.id)))).scalar() or 0
     forms_count = (await db.execute(select(func.count(FormDefinition.id)))).scalar() or 0
     submissions_count = (await db.execute(select(func.count(FormSubmission.id)))).scalar() or 0
     workflows_count = (await db.execute(select(func.count(WorkflowInstance.id)))).scalar() or 0
 
     stats = {
-        "products": products_count,
+        "items": items_count,
         "categories": categories_count,
         "forms": forms_count,
         "submissions": submissions_count,

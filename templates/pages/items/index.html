@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block title %}Items - Boilerworks{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Items</h1>
+    <a href="/items/create" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-medium transition-colors">New Item</a>
+</div>
+<div id="items-list">
+    {% include "pages/items/_list.html" %}
+</div>
+{% endblock %}

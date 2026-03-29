@@ -82,7 +82,7 @@ def upgrade() -> None:
     )
 
     op.create_table(
-        "products",
+        "items",
         sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("gen_random_uuid()")),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text(), nullable=False, server_default=""),
@@ -179,7 +179,7 @@ def downgrade() -> None:
     op.drop_table("workflow_definitions")
     op.drop_table("form_submissions")
     op.drop_table("form_definitions")
-    op.drop_table("products")
+    op.drop_table("items")
     op.drop_table("categories")
     op.drop_table("user_groups")
     op.drop_table("group_permissions")

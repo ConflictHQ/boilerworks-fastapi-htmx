@@ -50,7 +50,7 @@ id: Mapped[uuid.UUID] = mapped_column(UUIDType(), primary_key=True, default=uuid
 
 ### Soft Deletes
 
-Business models (Product, Category, FormDefinition, FormSubmission, WorkflowDefinition,
+Business models (Item, Category, FormDefinition, FormSubmission, WorkflowDefinition,
 WorkflowInstance) include a `deleted_at` column from `SoftDeleteMixin`. Records are never
 hard-deleted through application routes. Instead, `deleted_at` is set to the current
 timestamp. All queries must filter `WHERE deleted_at IS NULL` to exclude soft-deleted rows.
@@ -67,7 +67,7 @@ The `SessionAuthMiddleware` reads the cookie, looks up the user via token hash,
 and attaches the user object to `request.state.user`.
 
 Routes are protected using `require_permission("resource.action")` as a FastAPI dependency.
-Permission codes follow the pattern `<resource>.<action>` (e.g., `products.view`,
+Permission codes follow the pattern `<resource>.<action>` (e.g., `items.view`,
 `categories.delete`). A 401 is returned for unauthenticated requests, 403 for
 insufficient permissions.
 

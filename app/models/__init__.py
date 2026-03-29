@@ -1,6 +1,6 @@
 from app.models.base import Base, SoftDeleteMixin, TimestampMixin
 from app.models.form import FormDefinition, FormSubmission
-from app.models.product import Category, Product
+from app.models.item import Category, Item
 from app.models.user import Group, GroupPermission, Permission, Session, User, UserGroup
 from app.models.workflow import TransitionLog, WorkflowDefinition, WorkflowInstance
 
@@ -15,7 +15,7 @@ __all__ = [
     "UserGroup",
     "GroupPermission",
     "Category",
-    "Product",
+    "Item",
     "FormDefinition",
     "FormSubmission",
     "WorkflowDefinition",

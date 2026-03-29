@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_async_session
 from app.dependencies import require_permission
-from app.models.product import Category
+from app.models.item import Category
 from app.models.user import User
 
 router = APIRouter(prefix="/categories", tags=["categories"])

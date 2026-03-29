@@ -13,11 +13,11 @@ class Category(SoftDeleteMixin, TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
 
-    products: Mapped[list["Product"]] = relationship(back_populates="category")
+    items: Mapped[list["Item"]] = relationship(back_populates="category")
 
 
-class Product(SoftDeleteMixin, TimestampMixin, Base):
-    __tablename__ = "products"
+class Item(SoftDeleteMixin, TimestampMixin, Base):
+    __tablename__ = "items"
 
     id: Mapped[uuid.UUID] = mapped_column(UUIDType(), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -28,4 +28,4 @@ class Product(SoftDeleteMixin, TimestampMixin, Base):
         UUIDType(), ForeignKey("categories.id", ondelete="SET NULL"), nullable=True
     )
 
-    category: Mapped[Category | None] = relationship(back_populates="products")
+    category: Mapped[Category | None] = relationship(back_populates="items")

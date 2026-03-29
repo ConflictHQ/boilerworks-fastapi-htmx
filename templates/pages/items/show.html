@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}{{ item.name }} - Boilerworks{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">{{ item.name }}</h1>
+    <div class="space-x-2">
+        <a href="/items/{{ item.id }}/edit" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors">Edit</a>
+        <a href="/items" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors">Back</a>
+    </div>
+</div>
+<div class="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl">
+    <dl class="space-y-4">
+        <div><dt class="text-sm text-gray-400">SKU</dt><dd class="text-gray-100">{{ item.sku }}</dd></div>
+        <div><dt class="text-sm text-gray-400">Price</dt><dd class="text-gray-100">${{ "%.2f"|format(item.price) }}</dd></div>
+        <div><dt class="text-sm text-gray-400">Description</dt><dd class="text-gray-100">{{ item.description or '-' }}</dd></div>
+        <div><dt class="text-sm text-gray-400">Category</dt><dd class="text-gray-100">{{ item.category.name if item.category else '-' }}</dd></div>
+    </dl>
+</div>
+{% endblock %}

@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.middleware.auth import SessionAuthMiddleware
-from app.routers import auth, categories, dashboard, forms, health, products, workflows
+from app.routers import auth, categories, dashboard, forms, health, items, workflows
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
@@ -30,7 +30,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(auth.router)
     app.include_router(dashboard.router)
-    app.include_router(products.router)
+    app.include_router(items.router)
     app.include_router(categories.router)
     app.include_router(forms.router)
     app.include_router(workflows.router)

@@ -10,10 +10,10 @@ from app.models.user import Group, GroupPermission, Permission, User, UserGroup
 from app.services.auth import hash_password
 
 PERMISSIONS = [
-    "products.view",
-    "products.create",
-    "products.edit",
-    "products.delete",
+    "items.view",
+    "items.create",
+    "items.edit",
+    "items.delete",
     "categories.view",
     "categories.create",
     "categories.edit",
