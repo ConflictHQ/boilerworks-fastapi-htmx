@@ -29,19 +29,19 @@ python3 -m venv .venv
 docker compose up -d postgres redis
 
 # Migrate and seed
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5442/boilerworks .venv/bin/alembic upgrade head
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5442/boilerworks .venv/bin/python -m app.seed
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/boilerworks .venv/bin/alembic upgrade head
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/boilerworks .venv/bin/python -m app.seed
 
 # Run
 make dev
-# -> http://localhost:8085 (admin@boilerworks.dev / password)
+# -> http://localhost:8000 (admin@boilerworks.dev / password)
 ```
 
 ## Docker
 
 ```bash
 docker compose up -d --build
-# -> http://localhost:8085
+# -> http://localhost:8000
 ```
 
 ## Tests
