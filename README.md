@@ -64,3 +64,7 @@ docker compose up -d --build
 ## Want to help build this?
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and the [stack primer](../primers/fastapi/PRIMER.md) for architecture and conventions.
+
+---
+
+Boilerworks is a [Conflict](https://weareconflict.com) brand. CONFLICT is a registered trademark of Conflict LLC.
