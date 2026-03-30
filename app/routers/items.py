@@ -83,16 +83,12 @@ async def show_item(
     user: User = Depends(require_permission("items.view")),
 ):
     result = await db.execute(
-        select(Item)
-        .where(Item.id == item_id, Item.deleted_at.is_(None))
-        .options(selectinload(Item.category))
+        select(Item).where(Item.id == item_id, Item.deleted_at.is_(None)).options(selectinload(Item.category))
     )
     item = result.scalar_one_or_none()
     if not item:
         return HTMLResponse("Not found", status_code=404)
-    return _templates(request).TemplateResponse(
-        request, "pages/items/show.html", context={"user": user, "item": item}
-    )
+    return _templates(request).TemplateResponse(request, "pages/items/show.html", context={"user": user, "item": item})
 
 
 @router.get("/{item_id}/edit", response_class=HTMLResponse)
@@ -102,9 +98,7 @@ async def edit_item_page(
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("items.edit")),
 ):
-    item = (
-        await db.execute(select(Item).where(Item.id == item_id, Item.deleted_at.is_(None)))
-    ).scalar_one_or_none()
+    item = (await db.execute(select(Item).where(Item.id == item_id, Item.deleted_at.is_(None)))).scalar_one_or_none()
     if not item:
         return HTMLResponse("Not found", status_code=404)
     categories = (
@@ -126,9 +120,7 @@ async def update_item(
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("items.edit")),
 ):
-    item = (
-        await db.execute(select(Item).where(Item.id == item_id, Item.deleted_at.is_(None)))
-    ).scalar_one_or_none()
+    item = (await db.execute(select(Item).where(Item.id == item_id, Item.deleted_at.is_(None)))).scalar_one_or_none()
     if not item:
         return HTMLResponse("Not found", status_code=404)
 
@@ -150,9 +142,7 @@ async def delete_item(
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(require_permission("items.delete")),
 ):
-    item = (
-        await db.execute(select(Item).where(Item.id == item_id, Item.deleted_at.is_(None)))
-    ).scalar_one_or_none()
+    item = (await db.execute(select(Item).where(Item.id == item_id, Item.deleted_at.is_(None)))).scalar_one_or_none()
     if not item:
         return HTMLResponse("Not found", status_code=404)
     item.deleted_at = datetime.now(UTC)
