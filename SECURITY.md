@@ -25,9 +25,8 @@ We will acknowledge your report within 48 hours and aim to release a fix within 
 
 When deploying Boilerworks:
 
-- Change all default credentials (database, MinIO, session secret)
-- Use HTTPS in production
-- Set `NODE_ENV=production`
-- Configure `CORS_ORIGINS` to your domain only
-- Use strong Auth0 credentials
-- Review the security hardening in `bootstrap.md`
+- Set a strong, unique `SECRET_KEY` — the default (`change-me-in-production`) signs session tokens and must never reach production
+- Change the seeded admin credentials (`admin@boilerworks.dev` / `password` from `app/seed.py`) or skip the seed entirely in production
+- Change the default PostgreSQL credentials (`postgres` / `postgres`) and do not publish the database or Redis ports beyond what your deployment needs
+- Serve over HTTPS only, and add `secure=True` to the session cookie in `app/routers/auth.py` (the template sets `httponly` and `samesite="strict"` but not `Secure`, since local dev is plain HTTP)
+- Set `DEBUG=false` (the default) in production

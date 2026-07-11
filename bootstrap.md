@@ -113,7 +113,7 @@ Run tests: `.venv/bin/pytest -v`
 docker compose up -d --build
 ```
 
-The app runs on port 8000. PostgreSQL is on the internal network only.
+The app is published on host port 8000. PostgreSQL (5432) and Redis (6379) are also published to the host for local development against the containers.
 
 ## Code Style
 

@@ -14,7 +14,7 @@ FastAPI paired with HTMX for teams that want Python's async performance with min
 - **Auth:** Session-based with bcrypt + SHA-256 token hashing
 - **Database:** PostgreSQL 16 + Alembic migrations
 - **Cache:** Redis 7
-- **Tests:** pytest + httpx AsyncClient (24 tests)
+- **Tests:** pytest + httpx AsyncClient
 - **Lint:** Ruff
 - **Deploy:** Docker Compose
 
@@ -63,7 +63,7 @@ docker compose up -d --build
 
 ## Want to help build this?
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) and the [stack primer](../primers/fastapi/PRIMER.md) for architecture and conventions.
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [bootstrap.md](bootstrap.md) for architecture and conventions.
 
 ---
 

@@ -15,7 +15,7 @@ Read it before writing any code.
 
 ## Status
 
-Complete. 24 tests passing. Docker verified.
+Complete. All tests passing (`.venv/bin/pytest -v`). Docker verified.
 
 ## Key Conventions
 
